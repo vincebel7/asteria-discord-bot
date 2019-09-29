@@ -1,3 +1,8 @@
+/**
+ * An RPG/fun Discord bot
+ * by vincebel
+ */
+
 /** 
  * Requirements
  */

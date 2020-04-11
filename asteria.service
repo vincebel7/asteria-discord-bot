@@ -1,0 +1,14 @@
+[Unit]
+Description=Asteria bot
+After=network.target
+
+[Service]
+Environment=NODE_PORT=3001
+ExecStart=/bin/bash /home/vince/asteria-bot/asteria/execute.sh
+Restart=always
+User=vince
+Group=vince
+Type=forking
+
+[Install]
+WantedBy=multi-user.target

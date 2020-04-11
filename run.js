@@ -12,7 +12,7 @@ var mysql = require('mysql');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-var mysql_pw = fs.readFileSync('../mysql_pw', 'utf8');
+var mysql_pw = fs.readFileSync('/home/vince/asteria-bot/mysql_pw', 'utf8');
 mysql_pw = mysql_pw.slice(0, mysql_pw.length - 1);
 
 var con = mysql.createConnection({
@@ -93,6 +93,12 @@ function getJoinRank(member, guild) {
 	return rank;
 }
 
+function roll(dividend) {
+	min = 1;
+	max = dividend;
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 
 /**
  * Listens
@@ -117,7 +123,6 @@ client.on('guildMemberAdd', member => {
 
 client.on('message', msg => {
 	// Check if user has data
-	
 
 	if (msg.content.slice(0,2) === 'a/') {
 		var message = msg.content.slice(2)
@@ -137,6 +142,7 @@ client.on('message', msg => {
 		else if (message == 'help') {
 			var helpmsg = "```ini\nAsteria is Hazelvale's very own RPG bot!\n\nUsage: a/[command]\n\nCommands:";
 			helpmsg += "\n[help] = The command you just ran. Gets all commands.";
+			helpmsg += "\n[roll] = Roll a number between 1-6. To specify, use a/roll <num>";
 			helpmsg += "\n[getrank] = Shows your join rank in Hazelvale.";
 			helpmsg += "\n[stats] = View your stats";
 
@@ -163,6 +169,20 @@ client.on('message', msg => {
  		else if (message == "getrank") {
 			msg.channel.send("Your join rank: " + getJoinRank(msg.author, msg.guild));
 		}
+
+		else if (message_word[0] == "roll") {
+			var dividend = message_word[1];
+			var default_dividend = 6;
+			dividend = parseInt(dividend);
+			if(Number.isInteger(dividend)) {
+				msg.channel.send("[1-" + dividend + "] You rolled: **" + roll(dividend) + "**");
+			}
+			else {
+				msg.channel.send("Defaulting to " + default_dividend + "-sided die");
+				msg.channel.send("[1-" + default_dividend + "] You rolled: **" + roll(default_dividend) + "**");
+			}
+		}
+
 		else if (message == "kristal") {
 			msg.channel.send("yee haw")	
 		}
@@ -189,6 +209,6 @@ client.on('message', msg => {
  * Login
  */
 
-var key = fs.readFileSync('../key', 'utf8');
+var key = fs.readFileSync('/home/vince/asteria-bot/key', 'utf8');
 key = key.slice(0, key.length - 1);
 client.login(key).then().catch(console.error);

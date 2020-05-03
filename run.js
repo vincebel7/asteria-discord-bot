@@ -106,18 +106,33 @@ function roll(dividend) {
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
+	//client.user.setAvatar('http://vnus.tech/z/avatar.png');
 });
 
 client.on('guildMemberAdd', member => {
-	console.log("New member joined: " + member);
+	console.log("New member joined");
 
-	//const channel = client.channels.find("id", "659579641199067146");
-	//if (!channel) return;
-	//channel.send(`Welcome to the server, ${member}`);
+	const channel = member.guild.channels.cache.find(ch => ch.id === '666845975045996545');
+	if (!channel) return;
 
-	//member.addRole(role);
+	const emojibun = client.emojis.cache.find(emoji => emoji.name == "BunnyLove");
+	channel.send(`${member} joined! WELCOME PRECIOUS ${emojibun}`);
+
+	//let role = member.guild.roles.cache.find(r => r.id === "659586601789292554");
+	//member.roles.add(role).catch(console.error);
 	
 	db_setup(member);
+});
+
+client.on('guildMemberRemove', member => {
+	console.log("Member left");
+
+	const channel = member.guild.channels.cache.find(ch => ch.id === '666845975045996545');
+	if (!channel) return;
+
+	//const emojiskull = client.emojis.cache.find(emoji => emoji.name == "skull");
+	leavestring = "**" + member.displayName + "** has left Hazelvale...";
+	channel.send(leavestring);
 });
 
 
@@ -142,7 +157,7 @@ client.on('message', msg => {
 		else if (message == 'help') {
 			var helpmsg = "```ini\nAsteria is Hazelvale's very own RPG bot!\n\nUsage: a/[command]\n\nCommands:";
 			helpmsg += "\n[help] = The command you just ran. Gets all commands.";
-			helpmsg += "\n[roll] = Roll a number between 1-6. To specify, use a/roll <num>";
+			helpmsg += "\n[roll] = Rolls a number 1-6. To specify, use a/roll <num> or DND format a/roll 2d20";
 			helpmsg += "\n[getrank] = Shows your join rank in Hazelvale.";
 			helpmsg += "\n[stats] = View your stats";
 
@@ -171,13 +186,37 @@ client.on('message', msg => {
 		}
 
 		else if (message_word[0] == "roll") {
-			var dividend = message_word[1];
-			var default_dividend = 6;
-			dividend = parseInt(dividend);
-			if(Number.isInteger(dividend)) {
-				msg.channel.send("[1-" + dividend + "] You rolled: **" + roll(dividend) + "**");
+				var invalid_arg = true;
+				var dividend = message_word[1];
+				var default_dividend = 6;
+				dividend_int = parseInt(dividend);
+	
+				//Check if DND format
+
+			if(message_word[1]) {
+				if(dividend.includes("d")){
+					var index = dividend.indexOf("d");
+					var v1 = parseInt(dividend.slice(0, index));
+					if(index == 0) { v1 = 1; }
+					var v2 = parseInt(dividend.slice(index + 1, dividend.length));
+
+					console.log("|v1=" + v1 + ",v2=" + v2 + "|");
+
+					if(Number.isInteger(v2)) {
+					//if((Number.isInteger(v2)) && (Number.isInteger(v1))) {
+						for (var i = 0; i < v1; i++) {
+							msg.channel.send("[" + v1 + "d" + v2 + "] You rolled " + roll(v2));
+						}
+						invalid_arg = false;
+					}
+				}	
+				else if(Number.isInteger(dividend_int)) {
+					msg.channel.send("[1-" + dividend_int + "] You rolled: **" + roll(dividend_int) + "**");
+					invalid_arg = false;
+				}
 			}
-			else {
+
+			if(invalid_arg) {
 				msg.channel.send("Defaulting to " + default_dividend + "-sided die");
 				msg.channel.send("[1-" + default_dividend + "] You rolled: **" + roll(default_dividend) + "**");
 			}
@@ -185,6 +224,10 @@ client.on('message', msg => {
 
 		else if (message == "kristal") {
 			msg.channel.send("yee haw")	
+		}
+
+		else if (message == "woo") {
+			msg.channel.send("goodnight")
 		}
 		
 
@@ -194,11 +237,6 @@ client.on('message', msg => {
 		else if (message == "gibhouse") {
 			assignHouse(msg.author);
 		}
-
-
-
-
-
 
 		else {
 			msg.channel.send("Command not recognized. Try a/help for help");
